@@ -15,21 +15,19 @@ router.post(
   }),
   // console.log(passport.authenticate())
   async function (req, res, next) {
-    console.log(req?.user, "user");
     if (req?.user?.status == 200) {
       return res
         .status(req?.user?.status)
-        .send({ message: "Login Successfully", data: user });
-    } else if (req?.user?.status === 401) {
+        .send({ message: "Login Successfully", data: req?.user });
+    } else if (req?.user?.status === 400) {
       return res
         .status(req?.user?.status)
         .send({ message: "User not present" });
-    } else if (req?.user?.status === 202) {
+    } else if (req?.user?.status === 401) {
       return res
         .status(req?.user?.status)
         .send({ message: "Invalid password" });
     } else {
-      console.log(req?.user);
       return res.status(400).send({ data: req?.user });
     }
   }

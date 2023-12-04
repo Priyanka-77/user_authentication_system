@@ -37,23 +37,19 @@ passport.use(
     },
     async (req, email, password, done) => {
       try {
-        console.log(password, "password");
         const query = "SELECT * from auth where email=$1";
         const values = [email];
 
         const result = await Query.fetch(query, values);
-        console.log("result", result[0]?.password_hash);
-        console.log(await bcrypt.compare(result[0]?.password_hash, password));
-        const password_data = await bcrypt.hash(password, 10);
 
         if (result && result?.length > 0) {
-          if (await bcrypt.compare(result[0]?.password_hash, password_data)) {
+          if (await bcrypt.compare(password, result[0]?.password_hash)) {
             return done(null, { status: 200, user: result[0] }, false); //login success
           } else {
             return done(null, { status: 401, user: null }, false); //invalid password
           }
         } else {
-          return done(null, { status: 201, user: null }, false); //user not found
+          return done(null, { status: 400, user: null }, false); //user not found
         }
       } catch (error) {
         return done(error);

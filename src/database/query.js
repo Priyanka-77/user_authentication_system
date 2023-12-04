@@ -1,6 +1,6 @@
 const client = require("./index");
 
-exports.create = (async (query, values) => {
+exports.create = async (query, values) => {
   try {
     await client.connect();
     let result = await client.query(query, values);
@@ -9,4 +9,17 @@ exports.create = (async (query, values) => {
   } catch (error) {
     return { error: error };
   }
-});
+};
+
+exports.fetch = async (query, values) => {
+  try {
+    await client.connect();
+    let result = await client.query(query, values);
+    client.end();
+    if (result) {
+      return result.rows;
+    }
+  } catch (error) {
+    return { error: error };
+  }
+};

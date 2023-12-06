@@ -1,22 +1,21 @@
-var express = require("express")
-var cors = require("cors")
-var cookieParser = require("cookie-parser")
-var bodyParser = require("body-parser")
-require('dotenv').config()
+var express = require("express");
+var cors = require("cors");
+var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
+const Auth = require("./src/controllers/authController");
+require("dotenv").config();
 
-const app = express()
+const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(cookieParser())
-app.use(cors({origin: true}))
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(cors({ origin: true }));
 
+const userRouter = require("./src/routes/user");
+const authRouter = require("./src/routes/auth");
 
-const userRouter = require("./src/routes/user")
-const authRouter = require("./src/routes/auth")
-
-app.use("/user",userRouter);
-app.use("/auth", authRouter)
+app.use("/user", Auth.validateTokenResponse, userRouter);
+app.use("/auth", authRouter);
 
 module.exports = app;
-

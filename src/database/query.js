@@ -17,7 +17,7 @@ exports.fetch = async (query, values) => {
     let result = await client.query(query, values);
     client.end();
     if (result) {
-      return result.rows;
+      return result.rows[0];
     }
   } catch (error) {
     return { error: error };

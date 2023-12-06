@@ -3,7 +3,10 @@ const bcrypt = require("bcrypt");
 const Query = require("../database/query");
 const passport = require("passport");
 const localStrategy = require("passport-local").Strategy;
-const jwtStrategy = require("passport-jwt").Strategy;
+const JWTStrategy = require("passport-jwt").Strategy;
+const ExtractJWT = require("passport-jwt").ExtractJwt;
+const jwt = require("jsonwebtoken");
+const moment = require("moment");
 
 exports.signUp = async (req, res, next) => {
   try {
@@ -42,9 +45,15 @@ passport.use(
 
         const result = await Query.fetch(query, values);
 
-        if (result && result?.length > 0) {
-          if (await bcrypt.compare(password, result[0]?.password_hash)) {
-            return done(null, { status: 200, user: result[0] }, false); //login success
+        if (result) {
+          if (await bcrypt.compare(password, result?.password_hash)) {
+            let payload = {
+              iat: moment().unix(),
+              exp: moment().add(7, "days").unix(),
+              user: { user_id: result.id, user_email: result.email },
+            };
+            result.accessToken = jwt.sign(payload, "secret");
+            return done(null, { status: 200, user: result }, false); //login success
           } else {
             return done(null, { status: 401, user: null }, false); //invalid password
           }
@@ -54,6 +63,28 @@ passport.use(
       } catch (error) {
         return done(error);
       }
+    }
+  )
+);
+
+exports.validateTokenResponse = async function (req, res, next) {
+  passport.authenticate("jwt", async (err, user) => {
+    if (!user) return res.status(401).send({ message: "Invalid-JWT" });
+    req.session = false;
+    req.user = user;
+    next();
+  })(req, res, next);
+};
+
+passport.use(
+  "jwt",
+  new JWTStrategy(
+    {
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+      secretOrKey: "secret",
+    },
+    function (jwt_payload, done) {
+      done(null, { id: jwt_payload?.user?.user_id });
     }
   )
 );

@@ -52,7 +52,9 @@ passport.use(
               exp: moment().add(7, "days").unix(),
               user: { user_id: result.id, user_email: result.email },
             };
-            result.accessToken = jwt.sign(payload, "secret");
+            result.accessToken = jwt.sign(payload, "secret", {
+              algorithm: "HS256",
+            });
             return done(null, { status: 200, user: result }, false); //login success
           } else {
             return done(null, { status: 401, user: null }, false); //invalid password

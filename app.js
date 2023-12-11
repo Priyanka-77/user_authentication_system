@@ -2,8 +2,8 @@ var express = require("express");
 var cors = require("cors");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
+var path = require("path");
 const Auth = require("./src/controllers/authController");
-require("dotenv").config();
 
 const app = express();
 

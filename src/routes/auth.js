@@ -13,7 +13,6 @@ router.post(
     session: false,
     failureMessage: { message: "Invalid Credentials" },
   }),
-  // console.log(passport.authenticate())
   async function (req, res, next) {
     if (req?.user?.status == 200) {
       return res

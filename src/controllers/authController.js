@@ -7,6 +7,8 @@ const JWTStrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
+const { sendEmail } = require("../communication/email");
+const { emailTemplate } = require("../communication/template");
 
 exports.signUp = async (req, res, next) => {
   try {
@@ -21,9 +23,17 @@ exports.signUp = async (req, res, next) => {
     const values = [uid, name, email, mobile_no, address, password_hash];
 
     const result = await Query.create(query, values);
-    return res
-      .status(200)
-      .send({ message: "You've signed-up successfully", data: result });
+
+    const template = await emailTemplate(name);
+
+    if (result === 1) {
+      await sendEmail("Signed Up Successfully", template, email);
+      return res
+        .status(200)
+        .send({ message: "You've signed-up successfully", data: result });
+    } else {
+      return res.status(400).send({ data: result });
+    }
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: error });
